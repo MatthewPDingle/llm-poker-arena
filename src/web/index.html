@@ -7,52 +7,92 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>LLM Poker Arena</h1>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>LLM Poker Arena</h1>
+      <div class="match-info">
+        <span id="hand-number">-</span>
+        <span id="stage-indicator">WAITING</span>
+      </div>
+    </header>
 
-    <div class="controls">
-      <div class="model-select">
-        <h3>Select Models</h3>
-        <div id="model-checkboxes"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Poker Table -->
+      <div class="table-container">
+        <div class="poker-table">
+          <!-- Table felt -->
+          <div class="table-felt">
+            <!-- Pot -->
+            <div class="pot-area">
+              <div class="pot-amount" id="pot">Pot: $0</div>
+            </div>
+
+            <!-- Community Cards -->
+            <div class="community-cards" id="community-cards">
+              <div class="card card-placeholder"></div>
+              <div class="card card-placeholder"></div>
+              <div class="card card-placeholder"></div>
+              <div class="card card-placeholder"></div>
+              <div class="card card-placeholder"></div>
+            </div>
+
+            <!-- Player Seats (positioned via CSS) -->
+            <div class="seats" id="seats">
+              <!-- Seats will be dynamically generated -->
+            </div>
+          </div>
+
+          <!-- Table rail -->
+          <div class="table-rail"></div>
+        </div>
       </div>
 
-      <div class="config">
-        <h3>Match Settings</h3>
-        <label>
-          Hands: <input type="number" id="hands" value="10" min="1" max="1000">
-        </label>
-        <label>
-          Starting Chips: <input type="number" id="chips" value="1000" min="100">
-        </label>
-        <label>
-          Small Blind: <input type="number" id="sb" value="10" min="1">
-        </label>
-        <label>
-          Big Blind: <input type="number" id="bb" value="20" min="2">
-        </label>
-      </div>
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Controls -->
+        <div class="controls-panel">
+          <h3>Setup Match</h3>
+          <div class="model-select" id="model-checkboxes">
+            <!-- Models loaded dynamically -->
+          </div>
 
-      <button id="start-btn" class="start-btn">Start Match</button>
+          <div class="config-row">
+            <label>Hands</label>
+            <input type="number" id="hands" value="20" min="1" max="1000">
+          </div>
+          <div class="config-row">
+            <label>Chips</label>
+            <input type="number" id="chips" value="1000" min="100">
+          </div>
+          <div class="config-row">
+            <label>Blinds</label>
+            <div class="blinds-input">
+              <input type="number" id="sb" value="10" min="1">
+              <span>/</span>
+              <input type="number" id="bb" value="20" min="2">
+            </div>
+          </div>
+
+          <button id="start-btn" class="btn-start">Start Match</button>
+        </div>
+
+        <!-- Action Log -->
+        <div class="log-panel">
+          <h3>Action Log</h3>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="arena">
-      <div class="status" id="status">Select models and start a match</div>
-
-      <div class="table" id="table">
-        <div class="community-cards" id="community"></div>
-        <div class="pot" id="pot">Pot: 0</div>
-        <div class="players" id="players"></div>
+    <!-- Results Modal -->
+    <div class="modal" id="results-modal" style="display: none;">
+      <div class="modal-content">
+        <h2>Match Complete</h2>
+        <div id="results-content"></div>
+        <button onclick="closeResults()" class="btn-close">Close</button>
       </div>
-
-      <div class="log-container">
-        <h3>Action Log</h3>
-        <div class="log" id="log"></div>
-      </div>
-    </div>
-
-    <div class="results" id="results" style="display: none;">
-      <h2>Match Results</h2>
-      <div id="results-content"></div>
     </div>
   </div>
 
