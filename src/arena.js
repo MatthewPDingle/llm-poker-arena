@@ -15,6 +15,7 @@ export class Arena {
 
     this.eventHandlers = {
       handStart: [],
+      stageChange: [],
       action: [],
       handEnd: [],
       matchEnd: []
@@ -90,9 +91,20 @@ export class Arena {
 
     this.emit('handStart', {
       handNumber: game.handNumber,
-      blinds: blindInfo,
-      players: game.players.map(p => ({ name: p.name, chips: p.chips }))
+      blinds: {
+        sb: { name: blindInfo.sbPlayer.name, amount: blindInfo.sbAmount },
+        bb: { name: blindInfo.bbPlayer.name, amount: blindInfo.bbAmount }
+      },
+      players: game.players.map(p => ({
+        name: p.name,
+        chips: p.chips,
+        holeCards: p.holeCards.map(c => c.toString())
+      })),
+      pot: game.pot
     });
+
+    // Track stage for change detection
+    let lastStage = game.stage;
 
     // Play until hand is complete
     while (game.stage !== STAGES.COMPLETE && game.stage !== STAGES.SHOWDOWN) {
@@ -100,6 +112,16 @@ export class Arena {
 
       if (currentPlayer.folded || currentPlayer.allIn || !currentPlayer.isActive) {
         continue;
+      }
+
+      // Check for stage change (new community cards)
+      if (game.stage !== lastStage) {
+        this.emit('stageChange', {
+          stage: game.stage,
+          communityCards: game.communityCards.map(c => c.toString()),
+          pot: game.pot
+        });
+        lastStage = game.stage;
       }
 
       const gameState = getGameState(game, currentPlayer.id);
@@ -120,7 +142,9 @@ export class Arena {
         player: currentPlayer.name,
         action: action.action,
         amount: action.amount,
-        stage: game.stage
+        stage: game.stage,
+        pot: game.pot + (action.amount || 0),
+        communityCards: game.communityCards.map(c => c.toString())
       });
 
       applyAction(game, currentPlayer.id, action.action, action.amount);

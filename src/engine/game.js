@@ -438,20 +438,24 @@ function endHand(game, winners, evaluated = null) {
     winners[i].chips += winAmount + (i === 0 ? remainder : 0);
   }
 
-  // Record hand history
+  // Record hand history (serialize cards to strings)
   game.handHistory.push({
     handNumber: game.handNumber,
-    winners: winners.map(w => w.id),
+    winners: winners.map(w => w.name),
     pot: game.pot,
-    communityCards: [...game.communityCards],
+    communityCards: game.communityCards.map(c => c.toString()),
     playerStates: game.players.map(p => ({
       id: p.id,
-      holeCards: [...p.holeCards],
+      name: p.name,
+      holeCards: p.holeCards.map(c => c.toString()),
       chips: p.chips,
       folded: p.folded,
       totalBet: p.totalBetThisHand
     })),
-    evaluated,
+    evaluated: evaluated ? evaluated.map(e => ({
+      id: e.id,
+      hand: { rank: e.hand.rank, name: e.hand.name, cards: e.hand.cards.map(c => c.toString()) }
+    })) : null,
     actions: [...game.actionHistory]
   });
 

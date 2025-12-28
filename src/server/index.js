@@ -95,6 +95,7 @@ app.post('/api/match/start', async (req, res) => {
     });
 
     currentArena.on('handStart', (data) => broadcast('handStart', data));
+    currentArena.on('stageChange', (data) => broadcast('stageChange', data));
     currentArena.on('action', (data) => broadcast('action', data));
     currentArena.on('handEnd', (data) => broadcast('handEnd', data));
     currentArena.on('matchEnd', (data) => broadcast('matchEnd', data));

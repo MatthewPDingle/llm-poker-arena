@@ -62,6 +62,9 @@ function handleEvent(event, data) {
     case 'handStart':
       handleHandStart(data);
       break;
+    case 'stageChange':
+      handleStageChange(data);
+      break;
     case 'action':
       handleAction(data);
       break;
@@ -80,15 +83,52 @@ function handleEvent(event, data) {
 
 function handleHandStart(data) {
   setStatus(`Hand #${data.handNumber}`);
-  updatePlayers(data.players);
+  updatePlayersWithCards(data.players);
   document.getElementById('community').innerHTML = '';
-  document.getElementById('pot').textContent = 'Pot: 0';
+  document.getElementById('pot').textContent = `Pot: ${data.pot}`;
   addLog(`=== Hand #${data.handNumber} ===`, 'hand');
+  addLog(`${data.blinds.sb.name} posts SB ${data.blinds.sb.amount}`, 'blind');
+  addLog(`${data.blinds.bb.name} posts BB ${data.blinds.bb.amount}`, 'blind');
+}
+
+function updatePlayersWithCards(players) {
+  const container = document.getElementById('players');
+  container.innerHTML = players.map(p => `
+    <div class="player">
+      <div class="player-name">${p.name}</div>
+      <div class="player-chips">${p.chips} chips</div>
+      <div class="player-cards">
+        ${p.holeCards ? p.holeCards.map(c => renderCard(c)).join('') : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleStageChange(data) {
+  const cardsStr = formatCardsForLog(data.communityCards);
+  addLog(`--- ${data.stage.toUpperCase()}: ${cardsStr} ---`, 'stage');
+  updateCommunityCards(data.communityCards);
+  document.getElementById('pot').textContent = `Pot: ${data.pot}`;
 }
 
 function handleAction(data) {
   const amountStr = data.amount > 0 ? ` ${data.amount}` : '';
-  addLog(`[${data.stage}] ${data.player}: ${data.action}${amountStr}`, data.action.toLowerCase().replace('_', '-'));
+  addLog(`${data.player}: ${data.action}${amountStr}`, data.action.toLowerCase().replace('_', '-'));
+
+  // Update table in real-time
+  if (data.communityCards && data.communityCards.length > 0) {
+    updateCommunityCards(data.communityCards);
+  }
+  document.getElementById('pot').textContent = `Pot: ${data.pot}`;
+}
+
+function formatCardsForLog(cards) {
+  return cards.map(c => {
+    const rank = c[0];
+    const suit = c[1];
+    const symbol = SUIT_SYMBOLS[suit] || suit;
+    return `${rank}${symbol}`;
+  }).join(' ');
 }
 
 function handleHandEnd(data) {

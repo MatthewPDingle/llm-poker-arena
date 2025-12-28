@@ -227,7 +227,9 @@ h1 {
 .log-entry.call { color: #4ecdc4; }
 .log-entry.check { color: #95a5a6; }
 .log-entry.all-in { color: #f39c12; }
+.log-entry.blind { color: #9b59b6; }
 .log-entry.hand { color: #00d4ff; font-weight: bold; }
+.log-entry.stage { color: #ffd700; font-weight: bold; }
 .log-entry.winner { color: #2ecc71; font-weight: bold; }
 
 .results {

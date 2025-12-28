@@ -8,139 +8,176 @@
 **LLM Poker Arena** - A web application where various AI models compete against each other in multi-way No-Limit Texas Hold'em. Models are evaluated using an Elo rating system.
 
 **Repository:** https://github.com/MatthewPDingle/llm-poker-arena
+**Owner:** Matt (@MatthewPDingle)
+
+## Project Management
+
+### Task Tracking
+- **GitHub Issues** - Source of truth for all tasks/features/bugs
+- **TASKS.md** - Current sprint, active work, session log
+- **This file (CLAUDE.md)** - Architecture, context, decisions
+
+### Workflow
+1. Check `TASKS.md` for current priorities
+2. Check GitHub Issues: `gh issue list --repo MatthewPDingle/llm-poker-arena`
+3. Work on highest priority items
+4. Update TASKS.md and commit changes
+5. Close issues when complete
+
+### Open Issues
+- #3 Elo Rating System
+- #4 Web UI (improvements)
+- #6 Database & Hand History
+- #7 Add more LLM providers
+- #8 Side pot calculation
+- #9 Match statistics and analytics
+
+### Closed Issues
+- #1 Core Poker Engine ✓
+- #2 LLM Model Adapters ✓
+- #5 Express Server & API ✓
 
 ## Tech Stack
 
 - **Runtime:** Node.js (v25+)
 - **Backend:** Express.js
 - **Frontend:** HTML/CSS/JS (vanilla)
-- **Database:** SQLite via sql.js (pure JS, no native deps)
+- **Database:** SQLite via sql.js (pure JS, no native deps for Termux)
 - **Real-time:** WebSocket for live game updates
 - **Environment:** Termux on Android
 
 ## Architecture
 
 ```
-src/
-├── engine/        # Poker game logic (COMPLETE)
-│   ├── deck.js        # Card/deck management, shuffling
-│   ├── hand.js        # Hand evaluation (all rankings)
-│   └── game.js        # Game state machine, betting
-├── models/        # LLM adapters (COMPLETE)
-│   ├── base.js        # Base adapter interface
-│   ├── claude.js      # Anthropic Claude (Opus, Sonnet, Haiku)
-│   ├── openai.js      # OpenAI (GPT-4o, o1, etc)
-│   └── index.js       # Exports
-├── arena.js       # Match runner (COMPLETE)
-├── server/        # Express API (COMPLETE)
-│   └── index.js       # Server + WebSocket + API
-└── web/           # Frontend (COMPLETE)
-    ├── index.html     # Main page
-    ├── style.css      # Poker table styling
-    └── app.js         # Client JS, WebSocket handling
-tests/
-└── engine.test.js # Poker engine tests (18 passing)
+llm-poker-arena/
+├── CLAUDE.md          # This file - project context
+├── TASKS.md           # Current sprint and session log
+├── package.json
+├── .env               # API keys (gitignored)
+├── src/
+│   ├── engine/        # Poker game logic ✓
+│   │   ├── deck.js        # Card/deck management
+│   │   ├── hand.js        # Hand evaluation (all rankings)
+│   │   └── game.js        # Game state machine, betting
+│   ├── models/        # LLM adapters ✓
+│   │   ├── base.js        # Base adapter interface
+│   │   ├── claude.js      # Anthropic Claude
+│   │   ├── openai.js      # OpenAI GPT
+│   │   └── index.js       # Exports
+│   ├── arena.js       # Match runner ✓
+│   ├── server/        # Express API ✓
+│   │   └── index.js       # Server + WebSocket
+│   └── web/           # Frontend ✓
+│       ├── index.html
+│       ├── style.css
+│       └── app.js
+├── tests/
+│   └── engine.test.js # 18 passing tests
+└── scripts/
+    └── test-match.js  # CLI match runner
 ```
-
-## Current Status
-
-### Completed
-- [x] Project scaffolding
-- [x] GitHub repo created
-- [x] CLAUDE.md for session continuity
-- [x] Core poker engine (deck, hand evaluation, game state)
-- [x] All hand rankings (high card -> royal flush)
-- [x] Model adapters (Claude, OpenAI)
-- [x] Arena match runner
-- [x] Express server with WebSocket
-- [x] Web UI with poker table visualization
-- [x] 18 passing tests
-
-### Not Yet Implemented
-- [ ] Elo rating system
-- [ ] Database persistence (sql.js)
-- [ ] Hand history storage/viewer
-- [ ] Gemini adapter
-- [ ] More model variants
-- [ ] Side pot calculation for multi-way all-ins
-- [ ] Leaderboard page
 
 ## Key Design Decisions
 
-1. **Modular model adapters** - Each LLM gets its own adapter file implementing a common interface. `BaseAdapter.getAction()` handles prompt formatting, API calls, and response parsing.
+1. **Modular model adapters** - Each LLM gets its own file extending `BaseAdapter`. Implement `callLLM(prompt)` method.
 
-2. **Standardized action format** - Models must respond with:
-   - `FOLD`
-   - `CHECK` (only if no bet to call)
-   - `CALL`
-   - `RAISE <amount>` (e.g., RAISE 100)
-   - `ALL_IN`
+2. **Standardized action format** - Models respond with:
+   - `FOLD` / `CHECK` / `CALL` / `RAISE <amount>` / `ALL_IN`
 
-3. **Game state prompt** - Models receive structured info:
-   - Their hole cards
-   - Community cards
-   - Pot size, current bet
-   - Stack sizes
+3. **Game state prompt** - Models receive:
+   - Hole cards, community cards
+   - Pot size, current bet, stack sizes
    - Position (Button, SB, BB, etc.)
-   - Opponents' visible info
 
-4. **Retry with fallback** - If LLM gives invalid response, retry up to 3x then fold.
+4. **Retry with fallback** - Invalid LLM response → retry 3x → fold
 
-## API Keys Required
+5. **Event-driven architecture** - Arena emits events (handStart, action, stageChange, handEnd, matchEnd) consumed by server/UI
 
-Set in `.env` file:
+## API Keys
+
+Set in `.env`:
 ```
-ANTHROPIC_API_KEY=your_key_here
-OPENAI_API_KEY=your_key_here
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GOOGLE_API_KEY=...
 ```
 
-## Running Locally
+## Quick Commands
 
 ```bash
+# Development
 cd ~/projects/llm-poker-arena
-npm install
-npm run dev      # Development server (port 3000)
-npm test         # Run tests
+node src/server/index.js    # Start server (localhost:3000)
+node scripts/test-match.js  # Run CLI test match
+npm test                    # Run engine tests
+
+# GitHub
+gh issue list --repo MatthewPDingle/llm-poker-arena
+gh issue create --repo MatthewPDingle/llm-poker-arena --title "..." --body "..."
+gh issue close <n> --repo MatthewPDingle/llm-poker-arena
 ```
 
-Then open http://localhost:3000 in browser.
+## Subagent Handoff Protocol
 
-## GitHub Issues
+When spawning a subagent for a task:
 
-- #1 Core Poker Engine (DONE)
-- #2 LLM Model Adapters (DONE)
-- #3 Elo Rating System (TODO)
-- #4 Web UI (DONE - basic version)
-- #5 Express Server & API (DONE)
-- #6 Database & Hand History (TODO)
+### 1. Context Files
+Tell the agent to read:
+- `CLAUDE.md` (this file)
+- `TASKS.md`
+- Specific source files for their task
+
+### 2. Task Definition
+Provide:
+- GitHub Issue number and content
+- Specific requirements and constraints
+- Expected output (files, tests)
+- Any gotchas or dependencies
+
+### 3. Example Prompt
+```
+You are working on llm-poker-arena.
+
+READ FIRST:
+- CLAUDE.md for project context
+- src/models/base.js for adapter interface
+
+TASK: Implement Gemini adapter (#7)
+- Create src/models/gemini.js
+- Extend BaseAdapter
+- Add to src/models/index.js exports
+- Add to server model list
+
+TEST: Run `node scripts/test-match.js` with Gemini
+```
 
 ## Session Handoff Notes
-
-*Update this section at the end of each session with context for the next one.*
 
 **Last Updated:** 2025-12-28
 
 **Session Summary:**
 - Built complete poker engine with hand evaluation
-- Created model adapters for Claude and OpenAI
-- Built Arena match runner
+- Created model adapters (Claude, OpenAI)
+- Built Arena match runner with events
 - Created Express server with WebSocket
-- Built web UI with poker table visualization
-- All 18 engine tests passing
+- Built web UI with real-time updates
+- Fixed JSON serialization bug
+- Added blinds to action log, cards visible during play
+- Created test-match.js script
+- Set up GitHub Issues for project management
+- Tested successfully: Claude Sonnet vs Claude Haiku
 
 **Working Features:**
 - Select 2+ models from UI
-- Start a match with configurable hands/blinds
-- Watch live action log
-- See final results and winner
+- Real-time action log with cards
+- Hole cards visible on table
+- Match results display
+- CLI test script
 
-**Blockers/Issues:**
-- Haven't tested with real API keys yet
+**Known Issues:**
 - Side pots not fully implemented for complex multi-way all-ins
 
-**Next Session Should:**
-1. Test with actual API keys (need .env setup)
-2. Implement Elo rating system
-3. Add database persistence with sql.js
-4. Create hand history viewer
-5. Add more model adapters (Gemini, Mistral, etc.)
+**Priority for Next Session:**
+1. #3 Elo Rating System - Track and display model rankings
+2. #6 Database - Persist hands, ratings, enable history
+3. #7 More LLM providers - Gemini, Mistral, etc.
