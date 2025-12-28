@@ -1,0 +1,25 @@
+{
+  "name": "llm-poker-arena",
+  "version": "0.1.0",
+  "description": "AI models compete in No-Limit Texas Hold'em with Elo ratings",
+  "main": "src/server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server/index.js",
+    "dev": "node --watch src/server/index.js",
+    "test": "node --test tests/"
+  },
+  "keywords": ["poker", "ai", "llm", "elo", "texas-holdem"],
+  "author": "Matt",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "sql.js": "^1.10.0",
+    "@anthropic-ai/sdk": "^0.24.0",
+    "openai": "^4.28.0",
+    "@google/generative-ai": "^0.2.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {}
+}
