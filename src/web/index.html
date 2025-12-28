@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Poker Arena</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>LLM Poker Arena</h1>
+
+    <div class="controls">
+      <div class="model-select">
+        <h3>Select Models</h3>
+        <div id="model-checkboxes"></div>
+      </div>
+
+      <div class="config">
+        <h3>Match Settings</h3>
+        <label>
+          Hands: <input type="number" id="hands" value="10" min="1" max="1000">
+        </label>
+        <label>
+          Starting Chips: <input type="number" id="chips" value="1000" min="100">
+        </label>
+        <label>
+          Small Blind: <input type="number" id="sb" value="10" min="1">
+        </label>
+        <label>
+          Big Blind: <input type="number" id="bb" value="20" min="2">
+        </label>
+      </div>
+
+      <button id="start-btn" class="start-btn">Start Match</button>
+    </div>
+
+    <div class="arena">
+      <div class="status" id="status">Select models and start a match</div>
+
+      <div class="table" id="table">
+        <div class="community-cards" id="community"></div>
+        <div class="pot" id="pot">Pot: 0</div>
+        <div class="players" id="players"></div>
+      </div>
+
+      <div class="log-container">
+        <h3>Action Log</h3>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+      <h2>Match Results</h2>
+      <div id="results-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

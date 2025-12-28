@@ -13,8 +13,8 @@
 
 - **Runtime:** Node.js (v25+)
 - **Backend:** Express.js
-- **Frontend:** HTML/CSS/JS (vanilla, may upgrade to React later)
-- **Database:** SQLite (hands, ratings, sessions)
+- **Frontend:** HTML/CSS/JS (vanilla)
+- **Database:** SQLite via sql.js (pure JS, no native deps)
 - **Real-time:** WebSocket for live game updates
 - **Environment:** Termux on Android
 
@@ -22,27 +22,24 @@
 
 ```
 src/
-├── engine/        # Poker game logic
-│   ├── deck.js        # Card/deck management
-│   ├── hand.js        # Hand evaluation (rankings)
-│   ├── game.js        # Game state machine
-│   └── betting.js     # Betting round logic
-├── models/        # LLM adapters (one per provider)
+├── engine/        # Poker game logic (COMPLETE)
+│   ├── deck.js        # Card/deck management, shuffling
+│   ├── hand.js        # Hand evaluation (all rankings)
+│   └── game.js        # Game state machine, betting
+├── models/        # LLM adapters (COMPLETE)
 │   ├── base.js        # Base adapter interface
-│   ├── claude.js      # Anthropic Claude
-│   ├── openai.js      # GPT-4, GPT-4o
-│   ├── gemini.js      # Google Gemini
-│   └── ...
-├── elo/           # Rating system
-│   └── rating.js      # Elo calculation
-├── server/        # Express API
-│   ├── index.js       # Entry point
-│   ├── routes.js      # API routes
-│   └── websocket.js   # Live updates
-└── web/           # Frontend
+│   ├── claude.js      # Anthropic Claude (Opus, Sonnet, Haiku)
+│   ├── openai.js      # OpenAI (GPT-4o, o1, etc)
+│   └── index.js       # Exports
+├── arena.js       # Match runner (COMPLETE)
+├── server/        # Express API (COMPLETE)
+│   └── index.js       # Server + WebSocket + API
+└── web/           # Frontend (COMPLETE)
     ├── index.html     # Main page
-    ├── style.css      # Styles
-    └── app.js         # Client JS
+    ├── style.css      # Poker table styling
+    └── app.js         # Client JS, WebSocket handling
+tests/
+└── engine.test.js # Poker engine tests (18 passing)
 ```
 
 ## Current Status
@@ -50,57 +47,72 @@ src/
 ### Completed
 - [x] Project scaffolding
 - [x] GitHub repo created
-- [x] CLAUDE.md created
+- [x] CLAUDE.md for session continuity
+- [x] Core poker engine (deck, hand evaluation, game state)
+- [x] All hand rankings (high card -> royal flush)
+- [x] Model adapters (Claude, OpenAI)
+- [x] Arena match runner
+- [x] Express server with WebSocket
+- [x] Web UI with poker table visualization
+- [x] 18 passing tests
 
-### In Progress
-- [ ] Initial project setup (package.json, dependencies)
-
-### Next Up
-- [ ] Core poker engine (deck, hand evaluation)
-- [ ] Game state machine
-- [ ] First model adapter (Claude)
-- [ ] Basic web UI
+### Not Yet Implemented
 - [ ] Elo rating system
-- [ ] Hand history logging
+- [ ] Database persistence (sql.js)
+- [ ] Hand history storage/viewer
+- [ ] Gemini adapter
+- [ ] More model variants
+- [ ] Side pot calculation for multi-way all-ins
+- [ ] Leaderboard page
 
 ## Key Design Decisions
 
-1. **Modular model adapters** - Each LLM gets its own adapter file implementing a common interface. This allows easy addition of new models.
+1. **Modular model adapters** - Each LLM gets its own adapter file implementing a common interface. `BaseAdapter.getAction()` handles prompt formatting, API calls, and response parsing.
 
-2. **Standardized action format** - Models must respond with valid poker actions:
+2. **Standardized action format** - Models must respond with:
    - `FOLD`
-   - `CHECK`
+   - `CHECK` (only if no bet to call)
    - `CALL`
-   - `RAISE <amount>`
+   - `RAISE <amount>` (e.g., RAISE 100)
    - `ALL_IN`
 
-3. **Game state representation** - Models receive a structured prompt with:
+3. **Game state prompt** - Models receive structured info:
    - Their hole cards
    - Community cards
-   - Pot size
+   - Pot size, current bet
    - Stack sizes
-   - Betting history
-   - Position information
+   - Position (Button, SB, BB, etc.)
+   - Opponents' visible info
 
-4. **Elo system** - Ratings update after each hand based on chip differential vs expected outcome.
+4. **Retry with fallback** - If LLM gives invalid response, retry up to 3x then fold.
 
 ## API Keys Required
 
-Models need API keys set as environment variables:
-- `ANTHROPIC_API_KEY` - Claude models
-- `OPENAI_API_KEY` - GPT models
-- `GOOGLE_API_KEY` - Gemini models
-- (add more as needed)
+Set in `.env` file:
+```
+ANTHROPIC_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+```
 
 ## Running Locally
 
 ```bash
 cd ~/projects/llm-poker-arena
 npm install
-npm run dev      # Development server
-npm start        # Production
+npm run dev      # Development server (port 3000)
 npm test         # Run tests
 ```
+
+Then open http://localhost:3000 in browser.
+
+## GitHub Issues
+
+- #1 Core Poker Engine (DONE)
+- #2 LLM Model Adapters (DONE)
+- #3 Elo Rating System (TODO)
+- #4 Web UI (DONE - basic version)
+- #5 Express Server & API (DONE)
+- #6 Database & Hand History (TODO)
 
 ## Session Handoff Notes
 
@@ -109,14 +121,26 @@ npm test         # Run tests
 **Last Updated:** 2025-12-28
 
 **Session Summary:**
-- Initial project setup in Termux
-- Created repo and directory structure
-- Established CLAUDE.md for session continuity
+- Built complete poker engine with hand evaluation
+- Created model adapters for Claude and OpenAI
+- Built Arena match runner
+- Created Express server with WebSocket
+- Built web UI with poker table visualization
+- All 18 engine tests passing
+
+**Working Features:**
+- Select 2+ models from UI
+- Start a match with configurable hands/blinds
+- Watch live action log
+- See final results and winner
 
 **Blockers/Issues:**
-- None currently
+- Haven't tested with real API keys yet
+- Side pots not fully implemented for complex multi-way all-ins
 
 **Next Session Should:**
-1. Set up package.json and install dependencies
-2. Implement core poker engine (start with deck.js and hand.js)
-3. Create GitHub issues for tracking features
+1. Test with actual API keys (need .env setup)
+2. Implement Elo rating system
+3. Add database persistence with sql.js
+4. Create hand history viewer
+5. Add more model adapters (Gemini, Mistral, etc.)
